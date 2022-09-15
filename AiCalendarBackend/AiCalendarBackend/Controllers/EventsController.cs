@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AiCalendarBackend.Models;
 
@@ -15,6 +10,12 @@ namespace AiCalendarBackend.Controllers
     {
         private readonly CalendarContext _context;
 
+        private readonly List<Event> _events = new()
+        {
+            new Event(1, "Football", "Footbal", "Tel Aviv", DateTime.Today, DateTime.Today, 0, "sports, outdoors",
+                "HE")
+        };
+
         public EventsController(CalendarContext context)
         {
             _context = context;
@@ -24,14 +25,16 @@ namespace AiCalendarBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
         {
-            return await _context.Events.ToListAsync();
+            return _events;
+            //return await _context.Events.ToListAsync();
         }
 
         // GET: api/Events/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Event>> GetEvent(long id)
         {
-            var @event = await _context.Events.FindAsync(id);
+            var @event = _events.FirstOrDefault(e => e.Id == id);
+            //var @event = await _context.Events.FindAsync(id);
 
             if (@event == null)
             {
