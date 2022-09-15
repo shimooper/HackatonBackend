@@ -35,6 +35,16 @@ namespace AiCalendarBackend.Controllers
 
             return @event;
         }
+        
+        // GET: api/Events/random
+        [HttpGet("random")]
+        public async Task<ActionResult<Event>> GetRandomEvent()
+        {
+            var eventsCount = await _context.Events.CountAsync();
+            var toSkip = new Random().Next(0, eventsCount);
+
+            return _context.Events.Skip(toSkip).First();
+        }
 
         // PUT: api/Events/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
