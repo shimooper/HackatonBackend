@@ -1,6 +1,6 @@
 ﻿namespace AiCalendarBackend.Models
 {
-    public sealed class User
+    public class User
     {
         public User()
         {
@@ -13,6 +13,6 @@
         public bool RealUser { get; set; }
         public string? PersonalInterests { get; set; }
         public DateTime AddedToDb { get; set; }
-        public ICollection<Interaction> Interactions { get; set; }
+        public virtual ICollection<Interaction> Interactions { get; set; }
     }
 }

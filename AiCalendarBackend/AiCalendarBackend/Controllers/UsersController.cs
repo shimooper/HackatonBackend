@@ -94,6 +94,25 @@ namespace AiCalendarBackend.Controllers
             return NoContent();
         }
 
+        // GET: api/Users/5/recommendations
+        [HttpGet("{userId}/recommendations")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetEventsRecommendationsForUser(long userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Currently return random events. TODO - call Reco service
+            var eventsCount = await _context.Events.CountAsync();
+            var toSkip = new Random().Next(0, eventsCount);
+            var recommendations = await _context.Events.Skip(toSkip).Take(5).ToListAsync();
+
+            return recommendations;
+        }
+
         private bool UserExists(long id)
         {
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();

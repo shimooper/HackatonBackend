@@ -1,6 +1,6 @@
 ﻿namespace AiCalendarBackend.Models
 {
-    public sealed class Event
+    public class Event
     {
         public Event()
         {
@@ -17,6 +17,6 @@
         public string Tags { get; set; }
         public string Language { get; set; }
         public DateTime AddedToDb { get; set; }
-        public ICollection<Interaction> Interactions { get; set; }
+        public virtual ICollection<Interaction> Interactions { get; set; }
     }
 }
