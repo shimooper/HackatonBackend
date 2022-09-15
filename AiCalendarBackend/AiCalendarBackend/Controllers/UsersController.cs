@@ -6,47 +6,47 @@ namespace AiCalendarBackend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EventsController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly CalendarContext _context;
 
-        public EventsController(CalendarContext context)
+        public UsersController(CalendarContext context)
         {
             _context = context;
         }
 
-        // GET: api/Events
+        // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            return await _context.Events.ToListAsync();
+            return await _context.Users.ToListAsync();
         }
 
-        // GET: api/Events/5
+        // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Event>> GetEvent(long id)
+        public async Task<ActionResult<User>> GetUser(long id)
         {
-            var @event = await _context.Events.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
 
-            if (@event == null)
+            if (user == null)
             {
                 return NotFound();
             }
 
-            return @event;
+            return user;
         }
 
-        // PUT: api/Events/5
+        // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEvent(long id, Event @event)
+        public async Task<IActionResult> PutUser(long id, User user)
         {
-            if (id != @event.Id)
+            if (id != user.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(@event).State = EntityState.Modified;
+            _context.Entry(user).State = EntityState.Modified;
 
             try
             {
@@ -54,7 +54,7 @@ namespace AiCalendarBackend.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!EventExists(id))
+                if (!UserExists(id))
                 {
                     return NotFound();
                 }
@@ -67,36 +67,36 @@ namespace AiCalendarBackend.Controllers
             return NoContent();
         }
 
-        // POST: api/Events
+        // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Event>> PostEvent(Event @event)
+        public async Task<ActionResult<User>> PostUser(User user)
         {
-            _context.Events.Add(@event);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEvent", new { id = @event.Id }, @event);
+            return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
-        // DELETE: api/Events/5
+        // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEvent(long id)
+        public async Task<IActionResult> DeleteUser(long id)
         {
-            var @event = await _context.Events.FindAsync(id);
-            if (@event == null)
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
             {
                 return NotFound();
             }
 
-            _context.Events.Remove(@event);
+            _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool EventExists(long id)
+        private bool UserExists(long id)
         {
-            return (_context.Events?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

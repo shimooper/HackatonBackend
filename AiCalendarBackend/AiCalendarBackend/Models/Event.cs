@@ -1,28 +1,22 @@
 ﻿namespace AiCalendarBackend.Models
 {
-    public class Event
+    public sealed class Event
     {
-        public Event(long id, string? name, string? description, string? location, DateTime starTime, DateTime endTime, float price, string? tags, string? language)
+        public Event()
         {
-            Id = id;
-            Name = name;
-            Description = description;
-            Location = location;
-            StarTime = starTime;
-            EndTime = endTime;
-            Price = price;
-            Tags = tags;
-            Language = language;
+            Interactions = new HashSet<Interaction>();
         }
 
         public long Id { get; set; }
-        public string? Name { get; set; }
-        public string? Description { get; set; }
-        public string? Location { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Location { get; set; }
         public DateTime StarTime { get; set; }
         public DateTime EndTime { get; set; }
         public float Price { get; set; }
-        public string? Tags { get; set; }
-        public string? Language { get; set; }
+        public string Tags { get; set; }
+        public string Language { get; set; }
+        public DateTime AddedToDb { get; set; }
+        public ICollection<Interaction> Interactions { get; set; }
     }
 }

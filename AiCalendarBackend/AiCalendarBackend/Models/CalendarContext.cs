@@ -10,5 +10,7 @@ namespace AiCalendarBackend.Models
         }
 
         public DbSet<Event> Events { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Interaction> Interactions { get; set; } = null!;
     }
 }
