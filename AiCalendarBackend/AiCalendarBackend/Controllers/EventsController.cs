@@ -12,7 +12,7 @@ namespace AiCalendarBackend.Controllers
 
         private readonly List<Event> _events = new()
         {
-            new Event(1, "Football", "Footbal", "Tel Aviv", DateTime.Today, DateTime.Today, 0, "sports, outdoors",
+            new Event(1, "Football", "Football", "Tel Aviv", DateTime.Today, DateTime.Today, 0, "sports, outdoors",
                 "HE")
         };
 
