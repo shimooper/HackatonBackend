@@ -1,5 +1,8 @@
-﻿namespace AiCalendarBackend.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace AiCalendarBackend.Models
 {
+    [Index(nameof(UserName), IsUnique = true)]
     public class User
     {
         public User()

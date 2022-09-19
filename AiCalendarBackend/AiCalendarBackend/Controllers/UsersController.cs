@@ -36,6 +36,20 @@ namespace AiCalendarBackend.Controllers
             return user;
         }
 
+        // GET: api/Users/username/yairshsh
+        [HttpGet("username/{userName}")]
+        public async Task<ActionResult<User>> GetUser(string userName)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.UserName.ToLower() == userName.ToLower());
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return user;
+        }
+
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -72,6 +86,7 @@ namespace AiCalendarBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
+            user.AddedToDb = DateTime.Now;
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 

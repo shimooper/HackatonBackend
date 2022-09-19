@@ -78,6 +78,7 @@ namespace AiCalendarBackend.Controllers
                 return BadRequest("eventId or userId doesn't exist");
             }
 
+            interaction.AddedToDb = DateTime.Now;
             _context.Interactions.Add(interaction);
             await _context.SaveChangesAsync();
 

@@ -82,6 +82,7 @@ namespace AiCalendarBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<Event>> PostEvent(Event @event)
         {
+            @event.AddedToDb = DateTime.Now;
             _context.Events.Add(@event);
             await _context.SaveChangesAsync();
 

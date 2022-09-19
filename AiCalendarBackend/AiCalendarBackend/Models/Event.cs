@@ -1,5 +1,8 @@
-﻿namespace AiCalendarBackend.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace AiCalendarBackend.Models
 {
+    [Index(nameof(Name), nameof(StarTime), IsUnique = true)]
     public class Event
     {
         public Event()
