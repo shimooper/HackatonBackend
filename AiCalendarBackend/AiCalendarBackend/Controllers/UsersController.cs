@@ -86,6 +86,11 @@ namespace AiCalendarBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
+            if (string.IsNullOrEmpty(user.UserName))
+            {
+                return BadRequest("Fields must not be empty");
+            }
+
             user.AddedToDb = DateTime.Now;
             _context.Users.Add(user);
             await _context.SaveChangesAsync();

@@ -82,6 +82,13 @@ namespace AiCalendarBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<Event>> PostEvent(Event @event)
         {
+            if (string.IsNullOrEmpty(@event.Name) || string.IsNullOrEmpty(@event.Description) ||
+                string.IsNullOrEmpty(@event.Location) || string.IsNullOrEmpty(@event.Tags) ||
+                string.IsNullOrEmpty(@event.Language))
+            {
+                return BadRequest("Fields must not be empty");
+            }
+
             @event.AddedToDb = DateTime.Now;
             _context.Events.Add(@event);
             await _context.SaveChangesAsync();
