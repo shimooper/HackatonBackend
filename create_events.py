@@ -2,7 +2,7 @@ import csv
 import requests
 
 
-EVENTS_CSV_FILE_PATH = ""
+EVENTS_CSV_FILE_PATH = r"E:\repos\HackatonBackend\Events.csv"
 API_ENDPOINT = "https://aicalendarbackend.azurewebsites.net/api/events"
 
 
@@ -23,9 +23,12 @@ def create_event(row):
 
 
 def main():
-    with open(EVENTS_CSV_FILE_PATH, newline='') as csvfile:
+    with open(EVENTS_CSV_FILE_PATH, encoding="ISO-8859-8") as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
+            if not row:
+                continue
+
             create_event(row)
 
 

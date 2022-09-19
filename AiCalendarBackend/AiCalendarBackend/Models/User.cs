@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace AiCalendarBackend.Models
 {
@@ -16,6 +17,16 @@ namespace AiCalendarBackend.Models
         public bool RealUser { get; set; }
         public string? PersonalInterests { get; set; }
         public DateTime AddedToDb { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<Interaction> Interactions { get; set; }
+    }
+
+
+    public class UserForLeaderBoard
+    {
+        public long Id { get; set; }
+        public string UserName { get; set; }
+        public int Score { get; set; }
     }
 }

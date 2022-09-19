@@ -46,6 +46,17 @@ namespace AiCalendarBackend.Controllers
                 return BadRequest();
             }
 
+            if (await _context.Events.FindAsync(interaction.EventId) == null ||
+                await _context.Users.FindAsync(interaction.UserId) == null)
+            {
+                return BadRequest("eventId or userId doesn't exist");
+            }
+
+            if (interaction.IsPositive == null)
+            {
+                return BadRequest("isPositive field must not be null");
+            }
+
             _context.Entry(interaction).State = EntityState.Modified;
 
             try
@@ -76,6 +87,11 @@ namespace AiCalendarBackend.Controllers
                 await _context.Users.FindAsync(interaction.UserId) == null)
             {
                 return BadRequest("eventId or userId doesn't exist");
+            }
+
+            if (interaction.IsPositive == null)
+            {
+                return BadRequest("isPositive field must not be null");
             }
 
             interaction.AddedToDb = DateTime.Now;

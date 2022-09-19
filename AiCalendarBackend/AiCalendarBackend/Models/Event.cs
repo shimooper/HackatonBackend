@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace AiCalendarBackend.Models
 {
@@ -20,6 +21,8 @@ namespace AiCalendarBackend.Models
         public string Tags { get; set; }
         public string Language { get; set; }
         public DateTime AddedToDb { get; set; }
+
+        [JsonIgnore]
         public virtual ICollection<Interaction> Interactions { get; set; }
     }
 }

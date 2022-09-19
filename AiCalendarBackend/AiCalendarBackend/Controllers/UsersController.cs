@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AiCalendarBackend.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AiCalendarBackend.Models;
 
 namespace AiCalendarBackend.Controllers
 {
@@ -131,6 +131,19 @@ namespace AiCalendarBackend.Controllers
             var recommendations = await _context.Events.Skip(toSkip).Take(5).ToListAsync();
 
             return recommendations;
+        }
+
+        // GET: api/Users/leaderboard
+        [HttpGet("leaderboard")]
+        public async Task<ActionResult<IEnumerable<UserForLeaderBoard>>> GetLeaderBoard()
+        {
+            var users = await _context.Users.Include(user => user.Interactions)
+                .OrderByDescending(user => user.Interactions.Count)
+                .Take(5)
+                .Select(user => new UserForLeaderBoard
+                    { Id = user.Id, UserName = user.UserName, Score = user.Interactions.Count * 10 }).ToListAsync();
+
+            return users;
         }
 
         private bool UserExists(long id)
