@@ -81,24 +81,64 @@ namespace AiCalendarBackend.Controllers
         // POST: api/Interactions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Interaction>> PostInteraction(Interaction interaction)
+        public async Task<ActionResult<Interaction>> PostInteraction(NewInteraction newInteraction)
         {
-            if (await _context.Events.FindAsync(interaction.EventId) == null ||
-                await _context.Users.FindAsync(interaction.UserId) == null)
+            if (await _context.Events.FindAsync(newInteraction.EventId) == null)
             {
-                return BadRequest("eventId or userId doesn't exist");
+                return BadRequest("eventId doesn't exist");
             }
 
-            if (interaction.IsPositive == null)
+            if (newInteraction.IsPositive == null)
             {
                 return BadRequest("isPositive field must not be null");
             }
 
-            interaction.AddedToDb = DateTime.Now;
-            _context.Interactions.Add(interaction);
+            if (newInteraction.UserId != null)
+            {
+                if (await _context.Users.FindAsync(newInteraction.UserId) == null)
+                {
+                    return BadRequest("userId doesn't exist");
+                }
+            }
+            else if (newInteraction.UserName != null)
+            {
+                var user = _context.Users.FirstOrDefault(u => u.UserName == newInteraction.UserName);
+                if (user == null)
+                {
+                    return BadRequest("userName doesn't exist");
+                }
+
+                newInteraction.UserId = user.Id;
+            }
+            else
+            {
+                return BadRequest("userId or userName must be supplied");
+            }
+
+            var dbInteraction = _context.Interactions.FirstOrDefault(i =>
+                i.EventId == newInteraction.EventId && i.UserId == newInteraction.UserId);
+            if (dbInteraction != null)
+            {
+                dbInteraction.IsPositive = newInteraction.IsPositive;
+                dbInteraction.AddedToDb = DateTime.Now;
+                _context.Entry(dbInteraction).State = EntityState.Modified;
+            }
+            else
+            {
+                dbInteraction = new Interaction
+                {
+                    EventId = newInteraction.EventId,
+                    UserId = newInteraction.UserId.Value,
+                    IsPositive = newInteraction.IsPositive,
+                    AddedToDb = DateTime.Now
+                };
+
+                _context.Interactions.Add(dbInteraction);
+            }
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetInteraction", new { id = interaction.Id }, interaction);
+            return CreatedAtAction("GetInteraction", new { id = dbInteraction.Id }, dbInteraction);
         }
 
         // DELETE: api/Interactions/5

@@ -89,6 +89,12 @@ namespace AiCalendarBackend.Controllers
                 return BadRequest("Fields must not be empty");
             }
 
+            if (_context.Events.FirstOrDefault(e => 
+                    e.Name == @event.Name && e.StarTime == @event.StarTime) != null)
+            {
+                return BadRequest("Event already exists");
+            }
+
             @event.AddedToDb = DateTime.Now;
             _context.Events.Add(@event);
             await _context.SaveChangesAsync();

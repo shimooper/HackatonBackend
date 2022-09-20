@@ -88,7 +88,12 @@ namespace AiCalendarBackend.Controllers
         {
             if (string.IsNullOrEmpty(user.UserName))
             {
-                return BadRequest("Fields must not be empty");
+                return BadRequest("UserName must not be empty");
+            }
+
+            if (user.RealUser == null)
+            {
+                return BadRequest("RealUser must not be null");
             }
 
             user.AddedToDb = DateTime.Now;

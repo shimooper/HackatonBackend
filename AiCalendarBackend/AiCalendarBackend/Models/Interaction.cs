@@ -17,4 +17,12 @@ namespace AiCalendarBackend.Models
         public bool? IsPositive { get; set; }
         public DateTime AddedToDb { get; set; }
     }
+
+    public class NewInteraction
+    {
+        public long EventId { get; set; }
+        public long? UserId { get; set; }
+        public string? UserName { get; set; }
+        public bool? IsPositive { get; set; }
+    }
 }

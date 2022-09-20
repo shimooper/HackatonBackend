@@ -14,7 +14,7 @@ namespace AiCalendarBackend.Models
         public long Id { get; set; }
         public string UserName { get; set; }
         public string? Email { get; set; }
-        public bool RealUser { get; set; }
+        public bool? RealUser { get; set; }
         public string? PersonalInterests { get; set; }
         public DateTime AddedToDb { get; set; }
 
