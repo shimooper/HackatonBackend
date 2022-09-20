@@ -10,7 +10,7 @@ namespace AiCalendarBackend.Controllers
     public class EventsController : ControllerBase
     {
         private readonly CalendarContext _context;
-        private readonly Random _gen = new Random();
+        private readonly Random _gen = new ();
 
         private readonly List<string> _locations = new List<string>()
         {
@@ -48,7 +48,7 @@ namespace AiCalendarBackend.Controllers
         public async Task<ActionResult<Event>> GetRandomEvent()
         {
             var eventsCount = await _context.Events.CountAsync();
-            var toSkip = new Random().Next(0, eventsCount);
+            var toSkip = _gen.Next(0, eventsCount);
 
             return _context.Events.Skip(toSkip).First();
         }
