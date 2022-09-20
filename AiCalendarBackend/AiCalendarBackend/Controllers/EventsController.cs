@@ -89,8 +89,8 @@ namespace AiCalendarBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<Event>> PostEvent(Event @event)
         {
-            if (string.IsNullOrEmpty(@event.Name) || string.IsNullOrEmpty(@event.Description) ||
-                string.IsNullOrEmpty(@event.Tags) || string.IsNullOrEmpty(@event.Language))
+            if (Utils.InvalidField(@event.Name) || Utils.InvalidField(@event.Description) ||
+                Utils.InvalidField(@event.Tags) || Utils.InvalidField(@event.Language))
             {
                 return BadRequest("Fields must not be empty");
             }
@@ -112,7 +112,7 @@ namespace AiCalendarBackend.Controllers
                 @event.EndTime = @event.StarTime + TimeSpan.FromHours(durationHours);
             }
 
-            if (string.IsNullOrEmpty(@event.Location))
+            if (Utils.InvalidField(@event.Location))
             {
                 var index = _gen.Next(_locations.Count);
                 @event.Location = _locations[index];

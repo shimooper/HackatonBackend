@@ -86,7 +86,7 @@ namespace AiCalendarBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-            if (string.IsNullOrEmpty(user.UserName))
+            if (Utils.InvalidField(user.UserName))
             {
                 return BadRequest("UserName must not be empty");
             }

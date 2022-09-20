@@ -100,7 +100,7 @@ namespace AiCalendarBackend.Controllers
                     return BadRequest("userId doesn't exist");
                 }
             }
-            else if (newInteraction.UserName != null)
+            else if (Utils.InvalidField(newInteraction.UserName))
             {
                 var user = _context.Users.FirstOrDefault(u => u.UserName == newInteraction.UserName);
                 if (user == null)
