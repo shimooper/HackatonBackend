@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AiCalendarBackend.Models;
 
@@ -9,6 +10,12 @@ namespace AiCalendarBackend.Controllers
     public class EventsController : ControllerBase
     {
         private readonly CalendarContext _context;
+        private readonly Random _gen = new Random();
+
+        private readonly List<string> _locations = new List<string>()
+        {
+            "Tel-Aviv", "Jerusalem", "Kfar-Saba", "Eilat", "Haifa", "Beer-Sheva", "Nazareth", "Herzliya", "Ramat-Gan"
+        };
 
         public EventsController(CalendarContext context)
         {
@@ -83,8 +90,7 @@ namespace AiCalendarBackend.Controllers
         public async Task<ActionResult<Event>> PostEvent(Event @event)
         {
             if (string.IsNullOrEmpty(@event.Name) || string.IsNullOrEmpty(@event.Description) ||
-                string.IsNullOrEmpty(@event.Location) || string.IsNullOrEmpty(@event.Tags) ||
-                string.IsNullOrEmpty(@event.Language))
+                string.IsNullOrEmpty(@event.Tags) || string.IsNullOrEmpty(@event.Language))
             {
                 return BadRequest("Fields must not be empty");
             }
@@ -93,6 +99,23 @@ namespace AiCalendarBackend.Controllers
                     e.Name == @event.Name && e.StarTime == @event.StarTime) != null)
             {
                 return BadRequest("Event already exists");
+            }
+
+            if (@event.StarTime == default || @event.EndTime == default)
+            {
+                var day = _gen.Next(1, 30);
+                var hour = _gen.Next(10, 20);
+                var minute = _gen.Next(0, 59);
+                var durationHours = _gen.Next(1, 4);
+
+                @event.StarTime = new DateTime(2022, 10, day, hour, minute, 0);
+                @event.EndTime = @event.StarTime + TimeSpan.FromHours(durationHours);
+            }
+
+            if (string.IsNullOrEmpty(@event.Location))
+            {
+                var index = _gen.Next(_locations.Count);
+                @event.Location = _locations[index];
             }
 
             @event.AddedToDb = DateTime.Now;
