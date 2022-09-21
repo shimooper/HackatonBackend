@@ -156,10 +156,14 @@ namespace AiCalendarBackend.Controllers
             }
 
             await _context.SaveChangesAsync();
-
+            
             var dbEvent = await _context.Events.FindAsync(dbInteraction.EventId);
             var dbUser = await _context.Users.FindAsync(dbInteraction.UserId);
-            SendMail(dbEvent, dbUser.Email);
+
+            if (dbUser.RealUser.Value)
+            {
+                SendMail(dbEvent, dbUser.Email);
+            }
 
             return CreatedAtAction("GetInteraction", new { id = dbInteraction.Id }, dbInteraction);
         }

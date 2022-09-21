@@ -94,8 +94,24 @@ namespace AiCalendarBackend.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
+            var dbUser = _context.Users.FirstOrDefault(u => u.UserName.ToLower() == userName.ToLower());
+            if (dbUser == null)
+            {
+                user.AddedToDb = DateTime.Now;
 
+                if (Utils.InvalidField(user.Email))
+                {
+                    user.Email = user.UserName;
+                }
+                
+                _context.Users.Add(user);
+            }
+            else
+            {
+                dbUser.PersonalInterests = user.PersonalInterests;
+                _context.Entry(dbUser).State = EntityState.Modified;
+            }
+            
             try
             {
                 await _context.SaveChangesAsync();

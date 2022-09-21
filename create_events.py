@@ -8,13 +8,18 @@ EVENTS_CSV_FILE_PATH = r"C:\repos\HackatonBackend\Hackacton Events Data.csv"
 API_ENDPOINT = "https://aicalendarbackend.azurewebsites.net/api/events"
 
 
+def delete():
+    for i in range(283, 289):
+        r = requests.delete(API_ENDPOINT + f"/{i}")
+        print(r.status_code)
+
 def main():
     df = pd.read_csv(EVENTS_CSV_FILE_PATH)
     for i in range(len(df)):
         event_data = {
             "Name": df.iloc[i, 0],
             "Description":  df.iloc[i, 1],
-            "Location":  df.iloc[i, 2],
+            "Location":  "",
             "StarTime":  df.iloc[i, 3],
             "EndTime":  df.iloc[i, 4],
             "Price":  float(df.iloc[i, 5]),
@@ -22,7 +27,11 @@ def main():
             "Language":  df.iloc[i, 7]
         }
 
-        r = requests.post(API_ENDPOINT, json=event_data)
+        try:
+            r = requests.post(API_ENDPOINT, json=event_data)
+        except Exception:
+            continue
+
         print(r.status_code)
         time.sleep(1)
 
