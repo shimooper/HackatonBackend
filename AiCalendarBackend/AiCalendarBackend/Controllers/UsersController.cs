@@ -1,4 +1,7 @@
-﻿using AiCalendarBackend.Models;
+﻿using System.Net;
+using System.Net.Mail;
+using System.Text;
+using AiCalendarBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -81,6 +84,37 @@ namespace AiCalendarBackend.Controllers
             return NoContent();
         }
 
+        // PUT: api/Users/username/Yair
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("username/{username}")]
+        public async Task<IActionResult> PutUserByUserName(string userName, User user)
+        {
+            if (userName != user.UserName)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(user).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(user.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -119,22 +153,26 @@ namespace AiCalendarBackend.Controllers
             return NoContent();
         }
 
-        // GET: api/Users/5/recommendations
-        [HttpGet("{userId}/recommendations")]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEventsRecommendationsForUser(long userId)
+        // GET: api/Users/Yair/recommendations
+        [HttpGet("{userName}/recommendations")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetEventsRecommendationsForUser(string userName)
         {
-            var user = await _context.Users.FindAsync(userId);
-
+            var user = _context.Users.FirstOrDefault(u => u.UserName.ToLower() == userName.ToLower());
             if (user == null)
             {
-                return NotFound();
+                user = new User
+                {
+                    UserName = userName,
+                    Email = userName,
+                    AddedToDb = DateTime.Now,
+                    RealUser = true
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
             }
 
-            // Currently return random events. TODO - call Reco service
-            var eventsCount = await _context.Events.CountAsync();
-            var toSkip = new Random().Next(0, eventsCount);
-            var recommendations = await _context.Events.Skip(toSkip).Take(5).ToListAsync();
-
+            var recommendations = await GetRecommendations();
             return recommendations;
         }
 
@@ -154,6 +192,16 @@ namespace AiCalendarBackend.Controllers
         private bool UserExists(long id)
         {
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        private async Task<List<Event>> GetRecommendations()
+        {
+            // Currently return random events. TODO - call Reco service
+            var eventsCount = await _context.Events.CountAsync();
+            var toSkip = new Random().Next(0, eventsCount);
+            var recommendations = await _context.Events.Skip(toSkip).Take(5).ToListAsync();
+
+            return recommendations;
         }
     }
 }
