@@ -1,9 +1,12 @@
 ﻿using System.Net;
 using System.Net.Mail;
 using System.Text;
+using System.Text.Json.Serialization;
 using AiCalendarBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using NuGet.Packaging;
 
 namespace AiCalendarBackend.Controllers
 {
@@ -12,10 +15,12 @@ namespace AiCalendarBackend.Controllers
     public class UsersController : ControllerBase
     {
         private readonly CalendarContext _context;
+        private readonly HttpClient _httpClient;
 
         public UsersController(CalendarContext context)
         {
             _context = context;
+            _httpClient = new HttpClient();
         }
 
         // GET: api/Users
@@ -103,7 +108,7 @@ namespace AiCalendarBackend.Controllers
                 {
                     user.Email = user.UserName;
                 }
-                
+
                 _context.Users.Add(user);
             }
             else
@@ -111,7 +116,7 @@ namespace AiCalendarBackend.Controllers
                 dbUser.PersonalInterests = user.PersonalInterests;
                 _context.Entry(dbUser).State = EntityState.Modified;
             }
-            
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -188,7 +193,7 @@ namespace AiCalendarBackend.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            var recommendations = await GetRecommendations();
+            var recommendations = await GetRecommendations(user);
             return recommendations;
         }
 
@@ -200,7 +205,7 @@ namespace AiCalendarBackend.Controllers
                 .OrderByDescending(user => user.Interactions.Count)
                 .Take(5)
                 .Select(user => new UserForLeaderBoard
-                    { Id = user.Id, UserName = user.UserName, Score = user.Interactions.Count * 10 }).ToListAsync();
+                { Id = user.Id, UserName = user.UserName, Score = user.Interactions.Count * 10 }).ToListAsync();
 
             return users;
         }
@@ -210,14 +215,92 @@ namespace AiCalendarBackend.Controllers
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
-        private async Task<List<Event>> GetRecommendations()
+        private async Task<List<Event>> GetRecommendations(User user)
         {
-            // Currently return random events. TODO - call Reco service
-            var eventsCount = await _context.Events.CountAsync();
-            var toSkip = new Random().Next(0, eventsCount);
-            var recommendations = await _context.Events.Skip(toSkip).Take(5).ToListAsync();
+            const int itemsToSelect = 10;
 
-            return recommendations;
+            var picksResponse = await CallReco(FormatPicksRequest(user.Id, user.PersonalInterests));
+            var items = picksResponse.Items?.Select(i => i.Id).Take(itemsToSelect).ToHashSet() ?? new HashSet<long>();
+
+            if (items.Count < itemsToSelect)
+            {
+                var bestSellingResponse = await CallReco(FormatBestSellingRequest(user.PersonalInterests));
+                items.AddRange(bestSellingResponse.Items?.Select(i => i.Id) ?? Enumerable.Empty<long>());
+            }
+
+            if (items.Any())
+            {
+                items = items.Take(itemsToSelect).ToHashSet();
+                return await _context.Events.Where(e => items.Contains(e.Id)).OrderBy(e => e.StarTime).ToListAsync();
+            }
+            else
+            {
+                var eventsCount = await _context.Events.CountAsync();
+                var toSkip = new Random().Next(0, eventsCount);
+                return await _context.Events.Skip(toSkip).Take(itemsToSelect).ToListAsync();
+            }
+
         }
+
+        private string FormatPicksRequest(long userId, string? tags = null)
+        {
+            var request = $"https://recointweeuon2on1-anon.int.reco.microsoft.com/Reco/v1.0/picks?userId={userId}&EnvironmentId=9c44e72e-8136-48fa-b95a-08d8d9cf5de6&AlgoType=RecentPurchases";
+            if (string.IsNullOrWhiteSpace(tags) == false)
+            {
+                request += $"&tag={tags}";
+            }
+
+            return request;
+        }
+
+        private string FormatBestSellingRequest(string? tags = null)
+        {
+            var request = "https://recointweeuon2on1-anon.int.reco.microsoft.com/Reco/v1.0/BestSelling?EnvironmentId=9c44e72e-8136-48fa-b95a-08d8d9cf5de6";
+            if (string.IsNullOrWhiteSpace(tags) == false)
+            {
+                request += $"&tag={tags}";
+            }
+
+            return request;
+        }
+
+        private async Task<RecoResponse> CallReco(string requestUrl)
+        {
+            var response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, requestUrl));
+            if (response.IsSuccessStatusCode == false)
+            {
+                return new RecoResponse();
+            }
+            var responseContent = await response.Content.ReadAsStringAsync();
+            if (responseContent == null)
+            {
+                return new RecoResponse();
+            }
+
+            return JsonConvert.DeserializeObject<RecoResponse>(responseContent);
+        }
+
+
+
     }
+
+    public class RecoResponse
+    {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+        [JsonPropertyName("items")]
+        public RecoItem[]? Items { get; set; } = Array.Empty<RecoItem>();
+
+        [JsonPropertyName("status")]
+        public string? Status { get; set; }
+    }
+
+    public class RecoItem
+    {
+        [JsonPropertyName("id")]
+        public long Id { get; set; }
+    }
+
+
+
 }
